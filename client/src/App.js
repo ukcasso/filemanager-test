@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FileData } from "./data/filedata";
 import axios from "axios";
+import "./App.css";
 
 function App() {
   const [selectedFiles, setSelectedFiles] = useState(undefined);
@@ -8,6 +9,7 @@ function App() {
 
   const [textFile, setTextFile] = useState("");
   const [textFileUrl, setTextFileUrl] = useState("");
+  const [fileTitle, setFileTitle] = useState("");
 
   const [isOpenTextArea, setIsOpenTextArea] = useState(false);
 
@@ -39,8 +41,9 @@ function App() {
     files.map((item, index) => console.log(item.name, item.webkitRelativePath));
   };
 
-  const loadFile = (url) => {
+  const loadFile = (url, title) => {
     setIsOpenTextArea(true);
+    setFileTitle(title);
     setTextFileUrl(url);
     const xmlhttp = new XMLHttpRequest();
     xmlhttp.open("GET", `http://localhost:3030/${url}`, false);
@@ -74,44 +77,61 @@ function App() {
   }, []);
 
   return (
-    <>
-      <div>
-        <form onSubmit={uploadFiles}>
-          <input
-            type="file"
-            name="file"
-            multiple
-            files
-            webkitdirectory="true"
-            onChange={selectFiles}
-            required
-          />
-          <button type="submit">전송</button>
-        </form>
-      </div>
-      <div className="fileList">
-        {FileData.map((item, index) => (
-          <ul type="square" key={index}>
-            <li
-              onClick={() => {
-                loadFile(item.url);
-              }}
-            >
-              {item.url}
-            </li>
-          </ul>
-        ))}
-      </div>
-      {isOpenTextArea ? (
-        <div className="fileContents">
-          <textarea
-            value={textFile}
-            onChange={(e) => setTextFile(e.target.value)}
-          ></textarea>
-          <button onClick={saveFile}>저장</button>
+    <div className="wallpaper">
+      <div className="wrapper">
+        <div>
+          <h3>파일 업로드</h3>
+          <form onSubmit={uploadFiles}>
+            <input
+              type="file"
+              name="file"
+              multiple
+              files
+              webkitdirectory="true"
+              onChange={selectFiles}
+              required
+            />
+            <button type="submit">전송</button>
+          </form>
         </div>
-      ) : null}
-    </>
+        <div className="fileListTable">
+          <h3>
+            파일 리스트<small>*파일 경로 클릭시 내용 확인 및 수정 가능</small>
+          </h3>
+          <ul type="square">
+            {FileData.map((item, index) => (
+              <>
+                <li
+                  className="fileList"
+                  key={index}
+                  onClick={() => {
+                    loadFile(item.url, item.title);
+                  }}
+                >
+                  {item.url}
+                </li>
+                <div>
+                  <button className="functionBtn" src={item.url}>
+                    다운로드
+                  </button>
+                  <button className="functionBtn">삭제</button>
+                </div>
+              </>
+            ))}
+          </ul>
+        </div>
+        {isOpenTextArea ? (
+          <div className="fileContents">
+            <h3>{fileTitle}</h3>
+            <textarea
+              value={textFile}
+              onChange={(e) => setTextFile(e.target.value)}
+            ></textarea>
+            <button onClick={saveFile}>저장</button>
+          </div>
+        ) : null}
+      </div>
+    </div>
   );
 }
 
